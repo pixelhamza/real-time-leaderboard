@@ -1,1 +1,5 @@
-"""Top-level API router placeholder."""
+"""Top-level API router."""
+
+from fastapi import APIRouter
+
+api_router = APIRouter()
