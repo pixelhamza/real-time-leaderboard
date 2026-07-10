@@ -8,6 +8,7 @@ const canvas = document.querySelector("#game-canvas");
 
 const context = canvas.getContext("2d");
 const leaderboardApiUrl = "/api/v1/leaderboard/scores";
+const leaderboardSocketUrl = `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws/leaderboard`;
 
 const world = {
   gravity: 1800,
@@ -39,6 +40,7 @@ const gameState = {
   nextObstacleIn: 1.2,
   obstacles: [],
   submitted: false,
+  leaderboardSocket: null,
 };
 
 function getGroundY() {
@@ -89,6 +91,24 @@ function getCurrentScore() {
   return Math.floor(gameState.distance / 10);
 }
 
+function renderLeaderboard(entries) {
+  leaderboardListNode.innerHTML = "";
+
+  if (!entries.length) {
+    leaderboardListNode.innerHTML = "<li>No runs yet. Be the first.</li>";
+    return;
+  }
+
+  for (const entry of entries) {
+    const item = document.createElement("li");
+    item.textContent = `#${entry.rank} ${entry.player_name} - ${entry.score}`;
+    leaderboardListNode.appendChild(item);
+  }
+
+  const topEntry = entries[0];
+  document.querySelector("#top-rank").textContent = `#${topEntry.rank}`;
+}
+
 async function submitScore() {
   if (gameState.submitted) {
     return;
@@ -122,6 +142,39 @@ async function submitScore() {
     leaderboardStatusNode.textContent = "Submission failed";
     console.error(error);
   }
+}
+
+function connectLeaderboardFeed() {
+  if (gameState.leaderboardSocket) {
+    gameState.leaderboardSocket.close();
+  }
+
+  const socket = new WebSocket(leaderboardSocketUrl);
+  gameState.leaderboardSocket = socket;
+  leaderboardStatusNode.textContent = "Connecting...";
+
+  socket.addEventListener("open", () => {
+    leaderboardStatusNode.textContent = "Live";
+  });
+
+  socket.addEventListener("message", (event) => {
+    try {
+      const payload = JSON.parse(event.data);
+      if (Array.isArray(payload.entries)) {
+        renderLeaderboard(payload.entries);
+      }
+    } catch (error) {
+      console.error("Failed to parse leaderboard update", error);
+    }
+  });
+
+  socket.addEventListener("close", () => {
+    leaderboardStatusNode.textContent = "Disconnected";
+  });
+
+  socket.addEventListener("error", () => {
+    leaderboardStatusNode.textContent = "Feed error";
+  });
 }
 
 function drawScene() {
@@ -260,8 +313,9 @@ function boot() {
   resetGame();
   drawScene();
   statusNode.textContent = "Scaffold ready";
-  leaderboardStatusNode.textContent = "Waiting for backend";
+  leaderboardStatusNode.textContent = "Connecting...";
   leaderboardListNode.innerHTML = "<li>Connect the live feed in the next step.</li>";
+  connectLeaderboardFeed();
 
   startButton.addEventListener("click", () => {
     if (gameState.gameOver) {
