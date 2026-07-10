@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     app_name: str = "Real-Time Leaderboard API"
     app_version: str = "0.1.0"
     redis_url: str = "redis://localhost:6379/0"
+    leaderboard_size: int = 10
 
     model_config = SettingsConfigDict(
         env_file=".env",
