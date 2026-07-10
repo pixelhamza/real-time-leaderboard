@@ -2,6 +2,10 @@
 
 from dataclasses import dataclass
 
+from redis.asyncio import Redis
+
+from app.core.config import Settings
+from app.leaderboard.events import publish_leaderboard_update
 from app.leaderboard.repository import LeaderboardRepository
 from app.leaderboard.schemas import (
     LeaderboardResponse,
@@ -15,6 +19,8 @@ from app.leaderboard.schemas import (
 @dataclass(slots=True)
 class LeaderboardService:
     repository: LeaderboardRepository
+    redis_client: Redis
+    settings: Settings
 
     async def get_leaderboard(self) -> LeaderboardResponse:
         entries = await self.repository.get_entries()
@@ -31,5 +37,11 @@ class LeaderboardService:
             player_id=payload.player_id,
             player_name=payload.player_name,
             score_delta=payload.score_delta,
+        )
+        leaderboard = await self.get_leaderboard()
+        await publish_leaderboard_update(
+            self.redis_client,
+            self.settings.redis_leaderboard_channel,
+            leaderboard.model_dump(mode="json"),
         )
         return ScoreSubmissionResponse(player=player, submitted_at=utcnow())

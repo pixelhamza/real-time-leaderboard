@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     app_name: str = "Real-Time Leaderboard API"
     app_version: str = "0.1.0"
     redis_url: str = "redis://localhost:6379/0"
+    redis_leaderboard_channel: str = "leaderboard:updates"
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/realtime_leaderboard"
     leaderboard_size: int = 10
 
