@@ -10,6 +10,7 @@ from app.core.database import Base, create_engine, create_session_factory
 from app.core.logging import configure_logging
 from app.core.redis import create_redis_client
 from app.leaderboard.container import build_leaderboard_service
+from app.leaderboard.manager import ConnectionManager
 from app.leaderboard import models as leaderboard_models
 
 
@@ -22,6 +23,7 @@ async def lifespan(app: FastAPI):
     app.state.db_engine = engine
     app.state.db_session_factory = session_factory
     app.state.redis = redis_client
+    app.state.connection_manager = ConnectionManager()
     async with engine.begin() as connection:
         await connection.run_sync(Base.metadata.create_all)
     app.state.leaderboard_service = build_leaderboard_service(settings, session_factory)
