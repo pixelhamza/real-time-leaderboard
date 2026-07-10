@@ -1,0 +1,165 @@
+:root {
+  --bg: #08111f;
+  --bg-accent: #10233d;
+  --panel: rgba(7, 18, 34, 0.84);
+  --panel-border: rgba(142, 183, 255, 0.18);
+  --text: #e8f1ff;
+  --muted: #8ba3c7;
+  --accent: #5ff2c6;
+  --accent-strong: #ffc857;
+  --danger: #ff5d73;
+  --shadow: 0 24px 60px rgba(0, 0, 0, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  background:
+    radial-gradient(circle at top, rgba(95, 242, 198, 0.08), transparent 28%),
+    linear-gradient(135deg, #07101e 0%, #0e1f37 52%, #050a13 100%);
+  color: var(--text);
+}
+
+.shell {
+  display: grid;
+  grid-template-columns: 1.15fr 1.4fr 0.85fr;
+  gap: 1.25rem;
+  padding: 1.5rem;
+}
+
+.panel {
+  border: 1px solid var(--panel-border);
+  border-radius: 24px;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(16px);
+}
+
+.intro,
+.sidebar {
+  padding: 1.5rem;
+}
+
+.eyebrow {
+  margin: 0 0 0.75rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.78rem;
+}
+
+h1,
+h2,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: 0.75rem;
+  font-size: clamp(2.3rem, 5vw, 4.4rem);
+  line-height: 0.95;
+}
+
+.lede {
+  color: var(--muted);
+  max-width: 28rem;
+}
+
+.player-form {
+  display: grid;
+  gap: 0.7rem;
+  margin-top: 2rem;
+}
+
+.player-form input,
+.player-form button {
+  min-height: 3rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  padding: 0 1rem;
+  font: inherit;
+}
+
+.player-form input {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+}
+
+.player-form button {
+  background: linear-gradient(135deg, var(--accent), #5fb8ff);
+  color: #03111d;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.game-stage {
+  padding: 1rem;
+}
+
+.stage-header,
+.leaderboard-head,
+.score-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stage-header {
+  margin-bottom: 1rem;
+  color: var(--muted);
+}
+
+#game-canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 18px;
+  background:
+    linear-gradient(180deg, rgba(95, 184, 255, 0.16), rgba(5, 10, 19, 0.2)),
+    #09111e;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sidebar {
+  display: grid;
+  gap: 1rem;
+}
+
+.score-card {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.score-card span,
+#leaderboard-status {
+  color: var(--muted);
+}
+
+.score-card strong {
+  font-size: 1.8rem;
+  color: var(--accent-strong);
+}
+
+.leaderboard {
+  padding: 1rem 1.1rem;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+#leaderboard-list {
+  margin: 1rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--muted);
+}
+
+@media (max-width: 1080px) {
+  .shell {
+    grid-template-columns: 1fr;
+  }
+}

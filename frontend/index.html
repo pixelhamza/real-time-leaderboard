@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Leaderboard Runner</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="panel intro">
+        <p class="eyebrow">Realtime Demo</p>
+        <h1>Leaderboard Runner</h1>
+        <p class="lede">
+          Endless runner frontend scaffold for the FastAPI leaderboard backend.
+        </p>
+        <form class="player-form">
+          <label for="player-name">Player name</label>
+          <input id="player-name" name="player-name" type="text" placeholder="Enter a name" />
+          <button type="button" id="start-button">Start Run</button>
+        </form>
+      </section>
+
+      <section class="panel game-stage">
+        <div class="stage-header">
+          <span>Run Status</span>
+          <strong id="run-status">Waiting to start</strong>
+        </div>
+        <canvas id="game-canvas" width="960" height="540"></canvas>
+      </section>
+
+      <aside class="panel sidebar">
+        <div class="score-card">
+          <span>Current Score</span>
+          <strong id="current-score">0</strong>
+        </div>
+        <div class="score-card">
+          <span>Top Rank</span>
+          <strong id="top-rank">-</strong>
+        </div>
+        <section class="leaderboard">
+          <div class="leaderboard-head">
+            <h2>Live Leaderboard</h2>
+            <span id="leaderboard-status">Disconnected</span>
+          </div>
+          <ol id="leaderboard-list">
+            <li>Leaderboard data will appear here.</li>
+          </ol>
+        </section>
+      </aside>
+    </main>
+
+    <script type="module" src="./game.js"></script>
+  </body>
+</html>
