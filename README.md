@@ -1,10 +1,18 @@
-# Real-Time Leaderboard Service
+# Real-Time Leaderboard API
 
-A backend service for managing real-time leaderboards, user rankings,and score tracking.Built with Node.js,Express,TypeScript,PostgreSQL, and Redis.
+FastAPI project scaffold for a real-time leaderboard backend.
 
-## Features
-- User registration and authentication
-- Score submission and history tracking
-- Real-time global leaderboard using sockets
-- User rank lookup
-- Top players report by time period
+## Structure
+
+```text
+app/
+  api/
+    routes/
+  core/
+  leaderboard/
+tests/
+```
+
+## Status
+
+Project structure only. Implementation is intentionally omitted.

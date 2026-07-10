@@ -1,0 +1,1 @@
+"""Leaderboard route placeholders."""
