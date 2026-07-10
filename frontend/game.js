@@ -12,6 +12,8 @@ const world = {
   gravity: 1800,
   groundHeight: 120,
   scrollSpeed: 320,
+  obstacleGapMin: 1.1,
+  obstacleGapMax: 2.1,
 };
 
 const player = {
@@ -29,8 +31,12 @@ const gameState = {
   animationFrame: 0,
   lastTime: 0,
   running: false,
+  gameOver: false,
   distance: 0,
   floorOffset: 0,
+  obstacleTimer: 0,
+  nextObstacleIn: 1.2,
+  obstacles: [],
 };
 
 function getGroundY() {
@@ -48,7 +54,32 @@ function resetGame() {
   gameState.distance = 0;
   gameState.floorOffset = 0;
   gameState.lastTime = 0;
+  gameState.gameOver = false;
+  gameState.obstacleTimer = 0;
+  gameState.nextObstacleIn = 1.2;
+  gameState.obstacles = [];
   scoreNode.textContent = "0";
+  startButton.textContent = "Start Run";
+}
+
+function spawnObstacle() {
+  const width = 34 + Math.floor(Math.random() * 18);
+  const height = 54 + Math.floor(Math.random() * 48);
+  gameState.obstacles.push({
+    width,
+    height,
+    x: canvas.width + 40,
+    y: getGroundY() - height,
+  });
+}
+
+function rectsOverlap(a, b) {
+  return (
+    a.x < b.x + b.width &&
+    a.x + a.width > b.x &&
+    a.y < b.y + b.height &&
+    a.y + a.height > b.y
+  );
 }
 
 function drawScene() {
@@ -75,9 +106,24 @@ function drawScene() {
   context.fillStyle = "#5ff2c6";
   context.fillRect(player.x, player.y, player.width, player.height);
 
+  for (const obstacle of gameState.obstacles) {
+    context.fillStyle = "#ff5d73";
+    context.fillRect(obstacle.x, obstacle.y, obstacle.width, obstacle.height);
+  }
+
   context.fillStyle = "#e8f1ff";
   context.font = '24px "Trebuchet MS", sans-serif';
   context.fillText("Runner training zone", 40, 48);
+
+  if (gameState.gameOver) {
+    context.fillStyle = "rgba(5, 10, 19, 0.72)";
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    context.fillStyle = "#e8f1ff";
+    context.font = 'bold 56px "Trebuchet MS", sans-serif';
+    context.fillText("Game Over", 320, 240);
+    context.font = '24px "Trebuchet MS", sans-serif';
+    context.fillText("Press Start Run to try again.", 300, 292);
+  }
 }
 
 function update(deltaSeconds) {
@@ -94,6 +140,34 @@ function update(deltaSeconds) {
   gameState.distance += world.scrollSpeed * deltaSeconds;
   gameState.floorOffset = (gameState.floorOffset - world.scrollSpeed * deltaSeconds) % 80;
   scoreNode.textContent = String(Math.floor(gameState.distance / 10));
+
+  gameState.obstacleTimer += deltaSeconds;
+  if (gameState.obstacleTimer >= gameState.nextObstacleIn) {
+    spawnObstacle();
+    gameState.obstacleTimer = 0;
+    gameState.nextObstacleIn =
+      world.obstacleGapMin + Math.random() * (world.obstacleGapMax - world.obstacleGapMin);
+  }
+
+  for (const obstacle of gameState.obstacles) {
+    obstacle.x -= world.scrollSpeed * deltaSeconds * 1.1;
+  }
+
+  gameState.obstacles = gameState.obstacles.filter((obstacle) => obstacle.x + obstacle.width > -20);
+
+  const playerBounds = {
+    x: player.x,
+    y: player.y,
+    width: player.width,
+    height: player.height,
+  };
+
+  for (const obstacle of gameState.obstacles) {
+    if (rectsOverlap(playerBounds, obstacle)) {
+      endRun();
+      break;
+    }
+  }
 }
 
 function loop(timestamp) {
@@ -114,7 +188,7 @@ function loop(timestamp) {
 }
 
 function jump() {
-  if (!gameState.running || player.jumps >= player.maxJumps) {
+  if (!gameState.running || gameState.gameOver || player.jumps >= player.maxJumps) {
     return;
   }
 
@@ -122,9 +196,18 @@ function jump() {
   player.jumps += 1;
 }
 
+function endRun() {
+  gameState.running = false;
+  gameState.gameOver = true;
+  window.cancelAnimationFrame(gameState.animationFrame);
+  statusNode.textContent = "Game over";
+  startButton.textContent = "Run Again";
+}
+
 function startRun() {
   resetGame();
   gameState.running = true;
+  gameState.gameOver = false;
   statusNode.textContent = `Running: ${playerNameInput.value.trim() || "Anonymous"}`;
   window.cancelAnimationFrame(gameState.animationFrame);
   gameState.animationFrame = window.requestAnimationFrame(loop);
@@ -138,6 +221,9 @@ function boot() {
   leaderboardListNode.innerHTML = "<li>Connect the live feed in the next step.</li>";
 
   startButton.addEventListener("click", () => {
+    if (gameState.gameOver) {
+      statusNode.textContent = "Restarting run";
+    }
     startRun();
   });
 
