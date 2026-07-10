@@ -7,6 +7,7 @@ const startButton = document.querySelector("#start-button");
 const canvas = document.querySelector("#game-canvas");
 
 const context = canvas.getContext("2d");
+const leaderboardApiUrl = "/api/v1/leaderboard/scores";
 
 const world = {
   gravity: 1800,
@@ -37,6 +38,7 @@ const gameState = {
   obstacleTimer: 0,
   nextObstacleIn: 1.2,
   obstacles: [],
+  submitted: false,
 };
 
 function getGroundY() {
@@ -58,6 +60,7 @@ function resetGame() {
   gameState.obstacleTimer = 0;
   gameState.nextObstacleIn = 1.2;
   gameState.obstacles = [];
+  gameState.submitted = false;
   scoreNode.textContent = "0";
   startButton.textContent = "Start Run";
 }
@@ -80,6 +83,45 @@ function rectsOverlap(a, b) {
     a.y < b.y + b.height &&
     a.y + a.height > b.y
   );
+}
+
+function getCurrentScore() {
+  return Math.floor(gameState.distance / 10);
+}
+
+async function submitScore() {
+  if (gameState.submitted) {
+    return;
+  }
+
+  const playerName = playerNameInput.value.trim() || "Anonymous";
+  const score = getCurrentScore();
+
+  gameState.submitted = true;
+  leaderboardStatusNode.textContent = "Submitting score...";
+
+  try {
+    const response = await fetch(leaderboardApiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        player_id: playerName.toLowerCase().replace(/\s+/g, "-"),
+        player_name: playerName,
+        score_delta: score,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Score submission failed: ${response.status}`);
+    }
+
+    leaderboardStatusNode.textContent = "Score submitted";
+  } catch (error) {
+    leaderboardStatusNode.textContent = "Submission failed";
+    console.error(error);
+  }
 }
 
 function drawScene() {
@@ -139,7 +181,7 @@ function update(deltaSeconds) {
 
   gameState.distance += world.scrollSpeed * deltaSeconds;
   gameState.floorOffset = (gameState.floorOffset - world.scrollSpeed * deltaSeconds) % 80;
-  scoreNode.textContent = String(Math.floor(gameState.distance / 10));
+  scoreNode.textContent = String(getCurrentScore());
 
   gameState.obstacleTimer += deltaSeconds;
   if (gameState.obstacleTimer >= gameState.nextObstacleIn) {
@@ -202,6 +244,7 @@ function endRun() {
   window.cancelAnimationFrame(gameState.animationFrame);
   statusNode.textContent = "Game over";
   startButton.textContent = "Run Again";
+  void submitScore();
 }
 
 function startRun() {
