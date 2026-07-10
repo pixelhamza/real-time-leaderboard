@@ -16,3 +16,16 @@ tests/
 ## Status
 
 Project structure only. Implementation is intentionally omitted.
+
+## Planned Layers
+
+- `app/main.py`
+  FastAPI application bootstrap
+- `app/api/`
+  HTTP and WebSocket entrypoints
+- `app/core/`
+  Shared settings and logging
+- `app/leaderboard/`
+  Domain schemas, services, repositories, and realtime coordination
+- `tests/`
+  Automated coverage for API and domain logic
